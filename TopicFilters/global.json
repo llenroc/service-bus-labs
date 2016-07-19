@@ -1,0 +1,3 @@
+{
+    "projects": [ "ApiClient", "ApiServer_v1", "ApiServer_v2" ]
+}
