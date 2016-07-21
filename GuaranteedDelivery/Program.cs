@@ -9,6 +9,8 @@ namespace ReplayDemo
     {
         static void Main(string[] args)
         {
+            Console.CursorVisible = false;
+
             var serviceBusNamesapce = ConfigurationManager.AppSettings["serviceBusNamespace"];
             var serviceBusTopicName = ConfigurationManager.AppSettings["serviceBusTopicName"];
             var serviceBusKeyName   = ConfigurationManager.AppSettings["serviceBusKeyName"];
@@ -23,16 +25,28 @@ namespace ReplayDemo
                 serviceBusTopicName, 
                 "replay-demo");
 
-            var lastMessageTime = DateTimeOffset.Now;
+            var seconds = 0;
+            var messageTimer = new System.Timers.Timer();
+            messageTimer.Interval = 1000;
+            messageTimer.AutoReset = true;
+            messageTimer.Elapsed += (o, e) =>
+            {
+                Console.Write($"\rWaiting: {++seconds}s");
+            };
+
             subscriptionClient.OnMessage((msg) =>
             {
+                messageTimer.Stop();
+                seconds = 0;
+                Console.WriteLine();
                 Console.WriteLine($"Received message Id: {msg.MessageId}");
                 Console.WriteLine("System died, message not completed.");
+                messageTimer.Start();
             }, new OnMessageOptions()
             {
                 AutoComplete = false
             });
-
+            
             Console.ReadLine();
         }
 
@@ -51,7 +65,9 @@ namespace ReplayDemo
 
             var topicClient = TopicClient.CreateFromConnectionString(
                 $"Endpoint=sb://{sbNamespace}.servicebus.windows.net/;SharedAccessKeyName={keyName};SharedAccessKey={accessKey};EntityPath={topicName}");
-            topicClient.Send(new BrokeredMessage());
+            var brokeredMessage = new BrokeredMessage();
+            topicClient.Send(brokeredMessage);
+            Console.WriteLine($"Placing message with Id: {brokeredMessage.MessageId} onto the topic.");
         }
     }
 }
