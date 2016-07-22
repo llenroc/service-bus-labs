@@ -33,7 +33,7 @@ namespace OrderTaker
             {
                 // Sleep for 1 second and then enqueue messages in a batch
                 Thread.Sleep(1000);
-                var orders = new Random().Next(100);
+                var orders = new Random().Next(1, 100);
                 var messages = new List<BrokeredMessage>();
                 for (var j = 0; j < orders; j++)
                 {
